@@ -37,4 +37,4 @@ Congrats !
 You have now a full working Terraform, ArgoCD GitOps Setup.
 
 If you like try to deploy some new services and play a little bit with your new setup
-
+test
