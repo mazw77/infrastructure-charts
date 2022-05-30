@@ -23,3 +23,8 @@ basic-auth-gateway:
   namespace: routing
 prometheus-stack:
   namespace: monitoring
+  helmValues:
+  - name: prometheus-stack.grafana.grafana\.ini.server.root_url
+    value: https://otctest1.mztest.de/grafana
+  - name: prometheus-stack.prometheus.prometheusSpec.externalUrl
+    value: https://otctest1.mztest.de/prometheus
