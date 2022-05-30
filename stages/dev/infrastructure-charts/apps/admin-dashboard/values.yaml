@@ -1,6 +1,6 @@
 dns:
   host: "SET BY STAGE VALUES"
-  hostPrefixRegex: "HostRegexp(`{host:admin.+}`)"
+  hostPrefixRegex: "HostRegexp(`{host:otctest1.+}`)"
 nginx:
   replicaCount: 1
   image:
