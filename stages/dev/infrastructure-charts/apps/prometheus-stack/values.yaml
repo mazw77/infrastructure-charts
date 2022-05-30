@@ -1,0 +1,72 @@
+prometheus-stack:
+  kubeControllerManager:
+    enabled: false
+  defaultRules:
+    create: true
+  prometheus:
+    prometheusSpec:
+      externalUrl: "REPLACE_ME"
+      routePrefix: "/prometheus"
+  grafana:
+    grafana.ini:
+      auth.generic_oauth:
+        name: Keycloak
+        enabled: false
+        allow_sign_up: true
+        client_id: grafana
+        scopes: openid profile email
+        auth_url: https://replaceme.de/auth/realms/REPLACE_ME/protocol/openid-connect/auth
+        token_url: https://replaceme.de/auth/realms/REPLACE_ME/protocol/openid-connect/token
+        api_url: https://replaceme.de/auth/realms/REPLACE_ME/protocol/openid-connect/userinfo
+        role_attribute_path: "contains(groups[*], 'ADMIN') && 'Admin' || contains(groups[*], 'EDITOR')"
+      auth.proxy:
+        enabled: true
+        header_name: X-Auth-Username
+        header_property: username
+        auto_sign_up: true
+      server:
+        serve_from_sub_path: true
+        root_url: "SET BY ARGOCD STAGE VALUES"
+  alertmanager:
+    config:
+      global:
+        resolve_timeout: 5m
+        slack_api_url: "REPLACE_ME"
+      route:
+        group_by: [ 'job' ]
+        group_wait: 30s
+        group_interval: 5m
+        repeat_interval: 12h
+        routes:
+          - receiver: 'null'
+            match:
+              alertname: Watchdog
+          - receiver: 'slack'
+            continue: true
+      receivers:
+        - name: 'null'
+        - name: 'slack'
+          slack_configs:
+            - channel: 'error-infrastructure'
+              link_names: true
+              send_resolved: true
+              title_link: '{{ (index .Alerts 0).GeneratorURL }}'
+              title: '{{ (index .Alerts 0).GeneratorURL | reReplaceAll "(.*)prometheus(.*)" "$1"}}  {{ (index .Alerts 0).Annotations.summary}}'
+              text: >-
+                {{ range .Alerts }}
+                  *Description:* {{ .Annotations.description }}
+                  *Details:*
+                  {{ range .Labels.SortedPairs }} • *{{ .Name }}:* `{{ .Value }}`
+                  {{ end }}
+                {{ end }}
+      templates:
+        - /etc/alertmanager/config/*.tmpl
+    alertmanagerSpec:
+      routePrefix: "/alertmanager"
+      resources:
+        requests:
+          memory: "100Mi"
+          cpu: "5m"
+dns:
+  host: "SET BY STAGE VALUES"
+  pathRule: "PathPrefix(`/grafana`)"

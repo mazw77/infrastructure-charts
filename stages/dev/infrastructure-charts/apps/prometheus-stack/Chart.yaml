@@ -1,0 +1,9 @@
+apiVersion: v2
+description: Grafana Prometheus Alertmanager
+name: prometheus-stack
+version: 1.0.0
+dependencies:
+  - alias: prometheus-stack
+    name: kube-prometheus-stack
+    repository: "file://dep/kube-prometheus-stack"
+    version: 35.0.2
